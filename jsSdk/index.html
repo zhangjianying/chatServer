@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="renderer" content="webkit" />
+  <meta name="force-rendering" content="webkit" />
+  <title>Example</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-8">
+        <!-- 登录 -->
+        <div id="loginPanel" class="login-pannel">
+          <!-- 登录 -->
+          <form class="form-horizontal" action="javascript:;">
+            <div class="form-group form-group-lg">
+              <label class="col-sm-3 control-label" for="nickName">用户名</label>
+              <div class="col-sm-9">
+                <input class="form-control" type="text" id="nickName" placeholder="填写用户名">
+              </div>
+            </div>
+            <div class="form-group form-group-lg">
+              <label class="col-sm-3 control-label" for="userId">用户ID</label>
+              <div class="col-sm-9">
+                <input class="form-control" type="number" id="userId" placeholder="id只能为数字">
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="btn btn-primary btn-lg btn-login">&nbsp;&nbsp;登录&nbsp;&nbsp;</div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 登录成功界面 -->
+        <div id="chatPanel" class="chat-panel">
+          <!-- 抬头信息 -->
+          <div class="header clearfix">
+            <div class="pull-left">
+              <div class="btn btn-danger btn-unlink">断开连接</div>
+              <div class="btn btn-warning btn-relink">重新登录</div>
+              <div class="btn btn-default btn-out-room">退出房间</div>
+              <div class="btn btn-default btn-clear">清空调试信息</div>
+              <div class="btn btn-default btn-server">获取服务器信息</div>
+            </div>
+            <div class="pull-right">
+              欢迎，<span id="userInfo">-</span> <span id="userStatus" style="color: red;"></span>
+            </div>
+          </div>
+
+          <!-- 主界面 -->
+          <div class="content">
+            <!-- 加入房间 -->
+            <div id="chatRoomForm">
+              <form class="form-horizontal" action="javascript:;">
+                <div class="form-group form-group-lg">
+                  <label class="col-sm-3 control-label" for="roomId">房间ID</label>
+                  <div class="col-sm-9">
+                    <input class="form-control" type="text" id="roomId" placeholder="请输入房间名">
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="btn btn-primary btn-lg btn-join-room">&nbsp;&nbsp;加入房间&nbsp;&nbsp;</div>
+                </div>
+              </form>
+            </div>
+
+            <!-- 聊天界面 -->
+            <div id="chatRoomPanel">
+              <div class="row">
+                <div class="col-xs-3 userlist-wrapper">
+                  <div class="clearfix title">
+                    <div class="pull-left">用户列表</div>
+                    <div class="pull-right userlist-count">
+                      <span>-</span>人
+                    </div>
+                  </div>
+                  <div class="content">
+                    <ul class="userlist">
+                      <li>暂无数据</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-xs-9 chatlist-wrapper">
+                  <div class="clearfix title">
+                    <div class="pull-left">聊天面板</div>
+                    <div class="pull-right chatlist-status">
+                      当前<span>-</span>
+                    </div>
+                  </div>
+                  <div class="content" id="roomChatContent">
+                    <!-- <div class="chat-box left-chat-box clearfix">
+                      <div>测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试</div>
+                    </div>
+                    <div class="chat-box right-chat-box clearfix">
+                      <div>测试测试测试测试</div>
+                    </div> -->
+                  </div>
+                  <div class="ctrl clearfix">
+                    <div class="ctrl-form">
+                      <textarea class="form-control text-msg-input"></textarea>
+                    </div>
+                    <div class="ctrl-btns text-right">
+                      <div class="btn btn-success btn-send-text-msg">发送文字</div>
+                      <div class="btn btn-default btn-send-file">发送文件</div>
+                    </div>
+
+                    <div style="display:none;" class="fileform">
+                      <input type="file" name="upfile">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 调试信息 -->
+      <div class="col-xs-4">
+        <div id="debugWindow">
+          <div id="reqWindow">
+            <p id="reqFisrt"><strong>发送面板</strong></p>
+          </div>
+          <div id="resWindow">
+            <p id="resFisrt"><strong>接收面板</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="myModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="header">
+          <div class="btn btn-primary btn-p2p-test-msg">发送测试消息</div>
+        </div>
+        <div class="content">
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div id="ctrl" style="display:none;">
+    <p>======================================</p>
+    <button onclick="btn_joinRoom('abcd')">加入房间</button>
+    <p>======================================</p>
+    <form action="javascript:;">
+      <p><input id="roomMessageInput" type="text"></p>
+      <p><button onclick="btn_sendRoomMessage()">发送文字消息</button></p>
+    </form>
+    <p>======================================</p>
+  </div> -->
+
+  <script src="wsWebsocket.js"></script>
+  <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="index.js"></script>
+</body>
+
+</html>
