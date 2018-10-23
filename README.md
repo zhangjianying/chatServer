@@ -8,3 +8,16 @@
 * 应用端集成JS SDK后与chatServer完成相关连接,开发过程侧重界面的编写和逻辑优化.
 * webHooks指用户使用js sdk过程中用户登录鉴权由webHooks主动发Http请求到用户业务服务器进行鉴权,鉴权通过后,JS SDK才会与chatServer建立连接.webHooks还能将用户的聊天消息转发送给用户业务服务器保存(chatServer本身不保存任何消息)
 
+
+# 目录大纲
+
+* [JSSDK 使用说明](doc/jssdk.md)
+* WebHooks使用说明
+* RestApi使用说明
+* 服务器端配置参数说明
+
+
+# QA
+
+## Q: chatServer能维持多少个连接?
+A: 目前测试结果是 单实例 1w 连接没有问题.没有找到更好的压测方式.如果你有兴趣可以告知测试方式和结果
