@@ -2,22 +2,14 @@ $(function() {
   //渲染页面
   $("#userId").val(RandomNum(100000, 999999));
 
-  //wsWebsocket实例
   var ws = new wsWebsocket({
     serverIP: "193.112.107.139",
-    // serverIP: "192.168.13.173",
     websocketPort: "8099",
     httpPort: "8011",
     isHttps: false
   });
 
-  // var ws = new wsWebsocket(
-  // "ws://192.168.13.173:8099/chatApplication/websocket"
-  //   "ws://193.112.107.139:8099/chatApplication/websocket"
-  // );
-  console.log(ws);
-
-  //ws必须等待建权成功
+  //ws必须等待鉴权成功
   ws.on(
     "ready",
     function() {
@@ -106,9 +98,6 @@ $(function() {
       userId: userId,
       nick: nickName,
       proxy: {
-        // authProxy: "http://192.168.13.173:8011/chatApplication/auth.do",
-        // msgResProxy:
-        //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do"
         authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
         msgResProxy:
           "http://193.112.107.139:8011/chatApplication/messageReveiced.do"
@@ -403,7 +392,6 @@ $(function() {
       return;
     }
 
-    console.log(msg);
     /**
      * 消息内容类型任意
      */
@@ -411,7 +399,6 @@ $(function() {
       text: msg,
       type: "text"
     };
-
     demoSendRoomMessage(msgObj);
   }
 
@@ -444,15 +431,6 @@ $(function() {
    *
    *
    **************************/
-  // ws.upload({
-  //   file: null,
-  //   before: function() {},
-  //   success: function() {},
-  //   error: function() {},
-  //   progress: function() {},
-  //   recieve: function() {}
-  // });
-
   $(".btn-send-file").on("click", function() {
     $("input[name=upfile]").trigger("click");
   });
@@ -460,14 +438,10 @@ $(function() {
   $("input[name=upfile]").on("change", function() {
     var $file = $(this);
     var files = $file[0].files;
-
     if (!files) {
       console.log("没有选择文件");
       return;
     }
-
-    console.log(files);
-
     ws.upload({
       file: files[0],
       before: function(clientFileId) {
