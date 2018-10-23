@@ -4,5 +4,4 @@ chatServer
 
 
 
-![Alt text](https://github.com/zhangjianying/cordva-smallvideo/raw/master/readme/1.jpg)
- ![Alt text](https://github.com/zhangjianying/cordva-smallvideo/raw/master/readme/2.jpg)
+![架构示意图](https://github.com/zhangjianying/chatServer/raw/master/doc/main.png)
