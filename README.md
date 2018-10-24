@@ -17,7 +17,7 @@
 
 
 # 例子说明
-* ==PC聊天室== 使用JS SDK之后整个聊天室js逻辑代码不超过500行 [进入聊天室](https://zhangjianying.github.io/chatServer/jsSdk/index.html)
+* ==聊天室[PC界面版]== 使用JS SDK之后整个聊天室js逻辑代码不超过500行 [进入聊天室](https://zhangjianying.github.io/chatServer/jsSdk/index.html)
 
 
 # 目录大纲
