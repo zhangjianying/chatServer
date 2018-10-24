@@ -2,24 +2,19 @@ $(function() {
   //渲染页面
   $("#userId").val(RandomNum(100000, 999999));
 
+  //wsWebsocket实例
   var ws = new wsWebsocket({
     serverIP: "193.112.107.139",
+    // serverIP: "192.168.13.173",
     websocketPort: "8099",
     httpPort: "8011",
     isHttps: false
   });
+  console.log(ws);
 
-  //ws必须等待鉴权成功
-  ws.on(
-    "ready",
-    function() {
-      //只执行一次
-    },
-    function(error) {
-      console.error("error", error);
-    }
-  );
-
+  /**
+   * 监听事件
+   */
   //用户已在线
   ws.on("online", function() {
     $("#userStatus").html("在线");
@@ -49,21 +44,6 @@ $(function() {
       $("#resWindow").scrollTop(0);
     }
   });
-
-  /**************************
-   *
-   *
-   *  断开连接
-   *
-   *
-   **************************/
-  $(".btn-unlink").on("click", demoDestroy);
-  function demoDestroy() {
-    /**
-     * 调用destroy方法断开连接
-     */
-    ws.destroy();
-  }
 
   /**************************
    *
@@ -98,9 +78,18 @@ $(function() {
       userId: userId,
       nick: nickName,
       proxy: {
+        // authProxy: "http://192.168.13.173:8011/chatApplication/auth.do",
+        // msgResProxy:
+        //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do"
         authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
         msgResProxy:
           "http://193.112.107.139:8011/chatApplication/messageReveiced.do"
+      },
+      function() {
+        //调用建权成功
+      },
+      function(error) {
+        console.error(error);
       }
     });
   }
@@ -108,19 +97,17 @@ $(function() {
   /**************************
    *
    *
-   *  收到通知
+   *  断开连接
    *
    *
    **************************/
-  ws.on("notification", function(res) {
-    console.log("============================");
-    console.log(res);
-    //当有用户退出或进入房间时
-    if (res.code === 351 || res.code === 350) {
-      //重新获取用户列表
-      demoGetRoomUserList();
-    }
-  });
+  $(".btn-unlink").on("click", demoDestroy);
+  function demoDestroy() {
+    /**
+     * 调用destroy方法断开连接
+     */
+    ws.destroy();
+  }
 
   /**************************
    *
@@ -134,6 +121,7 @@ $(function() {
     ws.getServerInfo(
       function(res) {
         console.log(res);
+        alert("在线人数：" + res.userCount + "\n" + "版本号：" + res.version);
       },
       function() {}
     );
@@ -197,6 +185,23 @@ $(function() {
     $(".chatlist-status > span").html("房间" + obj.roomId);
     $("#roomChatContent").empty();
   }
+
+  /**************************
+   *
+   *
+   *  收到通知
+   *
+   *
+   **************************/
+  ws.on("notification", function(res) {
+    console.log("============================");
+    console.log(res);
+    //当有用户退出或进入房间时
+    if (res.code === 351 || res.code === 350) {
+      //重新获取用户列表
+      demoGetRoomUserList();
+    }
+  });
 
   /**************************
    *
@@ -310,28 +315,69 @@ $(function() {
       console.log(msgObj);
 
       var msgBox = "";
+      var direction = "";
 
       if (res.sendUserInfo.userId == ws.getUserInfo().userId) {
-        //右消息渲染
-        msgBox =
-          '<div class="chat-box right-chat-box clearfix"><div>' +
-          res.sendUserInfo.nick +
-          "说：" +
-          msgObj.text +
-          "</div></div>";
+        direction = "right";
       } else {
-        //左消息渲染
-        msgBox =
-          '<div class="chat-box left-chat-box clearfix"><div>' +
-          res.sendUserInfo.nick +
-          "说：" +
-          msgObj.text +
-          "</div></div>";
+        direction = "left";
+      }
+
+      if (msgObj.type === "file") {
+        msgBox = renderFileMessageBox(direction, msgObj, res.sendUserInfo);
+      } else if (msgObj.type === "image") {
+        msgBox = renderImageMessageBox(direction, msgObj, res.sendUserInfo);
+      } else if (msgObj.type === "text") {
+        msgBox = renderTextMessageBox(direction, msgObj, res.sendUserInfo);
       }
 
       // console.log(msgBox);
       $("#roomChatContent").append(msgBox);
     } catch (e) {}
+  }
+
+  function renderTextMessageBox(direction, msgObj, sendUserInfo) {
+    var msgBox =
+      '<div class="chat-box ' +
+      direction +
+      '-chat-box clearfix"><div>' +
+      sendUserInfo.nick +
+      "说：" +
+      msgObj.content +
+      "</div></div>";
+    return msgBox;
+  }
+
+  function renderImageMessageBox(direction, msgObj, sendUserInfo) {
+    var msgBox =
+      '<div class="chat-box ' +
+      direction +
+      '-chat-box clearfix"><div><p>' +
+      sendUserInfo.nick +
+      "说：" +
+      "</p>" +
+      "<p><img src='" +
+      msgObj.content.url +
+      "/80'></p>" +
+      "</div></div>";
+    return msgBox;
+  }
+
+  function renderFileMessageBox(direction, msgObj, sendUserInfo) {
+    var msgBox =
+      '<div class="chat-box ' +
+      direction +
+      '-chat-box clearfix"><div><p>' +
+      sendUserInfo.nick +
+      "说：" +
+      "</p>" +
+      "<p><a style='color: #fff;text-decoration:underline;' href='" +
+      msgObj.content.url +
+      "'>" +
+      msgObj.content.orgFileName +
+      "下载</a></p>" +
+      "</div></div>";
+    return msgBox;
   }
 
   /**************************
@@ -376,14 +422,6 @@ $(function() {
    *
    *
    **************************/
-  function demoSendRoomMessage(msg) {
-    //发送房间消息
-    ws.sendRoomMessage(msg, function() {
-      console.log("房间消息已发送");
-      $(".text-msg-input").val("");
-    });
-  }
-
   //发送文字聊天记录
   $(".btn-send-text-msg").on("click", sendTextMessage);
   function sendTextMessage() {
@@ -396,10 +434,15 @@ $(function() {
      * 消息内容类型任意
      */
     var msgObj = {
-      text: msg,
+      content: msg,
       type: "text"
     };
-    demoSendRoomMessage(msgObj);
+
+    //发送房间消息
+    ws.sendRoomMessage(msgObj, function() {
+      console.log("房间消息已发送");
+      $(".text-msg-input").val("");
+    });
   }
 
   /**
@@ -431,6 +474,15 @@ $(function() {
    *
    *
    **************************/
+  // ws.upload({
+  //   file: null,
+  //   before: function() {},
+  //   success: function() {},
+  //   error: function() {},
+  //   progress: function() {},
+  //   recieve: function() {}
+  // });
+
   $(".btn-send-file").on("click", function() {
     $("input[name=upfile]").trigger("click");
   });
@@ -438,10 +490,18 @@ $(function() {
   $("input[name=upfile]").on("change", function() {
     var $file = $(this);
     var files = $file[0].files;
+
     if (!files) {
       console.log("没有选择文件");
       return;
     }
+
+    console.log(files);
+    var type = "image";
+    if (!checkImgType(files[0].name)) {
+      type = "file";
+    }
+
     ws.upload({
       file: files[0],
       before: function(clientFileId) {
@@ -461,6 +521,18 @@ $(function() {
       recieve: function(res) {
         console.log("回执：" + JSON.stringify(res));
         console.log(res.clientFileId);
+
+        /**
+         * 消息内容类型任意
+         */
+        var msgObj = {
+          content: res,
+          type: type
+        };
+
+        ws.sendRoomMessage(msgObj, function() {
+          console.log("房间消息已发送");
+        });
       }
     });
   });
@@ -477,5 +549,22 @@ $(function() {
       var num = Min + Math.round(Rand * Range) - 1;
       return num;
     }
+  }
+
+  /**
+   *
+   * @param {*} ths
+   */
+  function checkImgType(name) {
+    if (!name) {
+      return false;
+    }
+
+    if (!/\.(gif|jpg|jpeg|png|GIF|JPG|PNG)$/.test(name)) {
+      // alert("图片类型必须是.gif,jpeg,jpg,png中的一种");
+      return false;
+    }
+
+    return true;
   }
 });
