@@ -23,7 +23,7 @@
 # 目录大纲
 
 * [JSSDK 使用说明](doc/jssdk.md)
-* WebHooks使用说明
+* [WebHooks使用说明](doc/WebHooks.md)
 * RestApi使用说明
 * 服务器端配置参数说明
 
