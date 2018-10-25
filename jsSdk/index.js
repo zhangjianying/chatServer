@@ -80,10 +80,14 @@ $(function() {
       proxy: {
         // authProxy: "http://192.168.13.173:8011/chatApplication/auth.do",
         // msgResProxy:
-        //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do"
+        //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do",
+        // actionResProxy:
+        //   "http://192.168.13.173:8011/chatApplication/actionMessage.do"
         authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
         msgResProxy:
-          "http://193.112.107.139:8011/chatApplication/messageReveiced.do"
+          "http://193.112.107.139:8011/chatApplication/messageReveiced.do",
+        actionResProxy:
+          "http://193.112.107.139:8011/chatApplication/actionMessage.do"
       },
       function() {
         //调用建权成功
@@ -442,6 +446,59 @@ $(function() {
     ws.sendRoomMessage(msgObj, function() {
       console.log("房间消息已发送");
       $(".text-msg-input").val("");
+    });
+  }
+
+  /**************************
+   *
+   *
+   *  发送动作消息
+   *
+   *
+   **************************/
+  $(".btn-send-action").on("click", sendActionMessage);
+  $(".btn-send-action1").on("click", sendActionMessage1);
+  function sendActionMessage() {
+    ws.sendActionMessage({
+      message: {
+        text: "我就是测试下"
+      },
+      before: function(clientMsgId) {
+        //发送前准备
+        console.log("发送动作准备中：" + clientMsgId);
+      },
+      success: function(clientMsgId) {
+        //发送完毕
+        console.log("发送动作完毕：" + clientMsgId);
+      },
+      recieve: function(res) {
+        //发送回执
+        console.log("发送动作回执：" + JSON.stringify(res));
+        console.log(res.clientMsgId);
+        alert(res.msg);
+      }
+    });
+  }
+
+  function sendActionMessage1() {
+    ws.sendActionMessage({
+      message: {
+        text: "我就是测试下1111111111"
+      },
+      before: function(clientMsgId) {
+        //发送前准备
+        console.log("发送动作准备中1111111111：" + clientMsgId);
+      },
+      success: function(clientMsgId) {
+        //发送完毕
+        console.log("发送动作完毕11111111111：" + clientMsgId);
+      },
+      recieve: function(res) {
+        //发送回执
+        console.log("发送动作回执11111111111111：" + JSON.stringify(res));
+        console.log(res.clientMsgId);
+        alert(res.msg);
+      }
     });
   }
 

@@ -17,7 +17,9 @@ chatServer 主动将关键事件通过HTTP/JSON请求发送给业务服务器进
         authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
         msgResProxy:
           "http://193.112.107.139:8011/chatApplication/messageReveiced.do"
-      }
+      },
+			 actionResProxy:
+          "http://193.112.107.139:8011/chatApplication/actionMessage.do"
     });
 ```
 
@@ -74,6 +76,52 @@ SpringMVC接口示例:
 
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("retVal", true);
+		return jsonObject;
+	}
+```
+
+
+## 3 动作消息 webHooks
+使用 js sdk 发起动作消息的时候, chatServer会将原始消息结构直接转发给业务处理服务器,待业务处理服务器处理完成后,并发送处理结果给jssdk
+
+```javascript
+ ws.sendActionMessage({
+      message: {
+        text: "我就是测试下"
+      },
+      before: function(clientMsgId) {
+        //发送前准备
+        console.log("发送动作准备中：" + clientMsgId);
+      },
+      success: function(clientMsgId) {
+        //发送完毕
+        console.log("发送动作完毕：" + clientMsgId);
+      },
+      recieve: function(res) {
+        //发送回执   ,回执消息根据业务处理器处理结果返回消息体
+        console.log("发送动作回执：" + JSON.stringify(res));
+        console.log(res.clientMsgId);
+        alert(res.msg);
+      }
+    });
+```
+
+服务器端:
+
+```java
+	/**
+	 * 动作消息 -- 回复
+	 */
+	@RequestMapping(value = "actionMessage.do", method = RequestMethod.POST)
+	@ResponseBody
+	public JSONObject actionMessage(@RequestBody String params, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		logger.info("收到的动作消息 [{}]", params);
+
+		// 验证成功就返回true. 否则返回false表示失败
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("retVal", true);
+		jsonObject.put("msg", "这是动作消息:" + System.currentTimeMillis());
 		return jsonObject;
 	}
 ```
