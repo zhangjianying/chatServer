@@ -72,30 +72,33 @@ $(function() {
     /**
      * 调用init方法建立连接
      */
-    ws.init({
-      token: "aaaaaaaaaaa",
-      headerImg: "aaaaaaaa",
-      userId: userId,
-      nick: nickName,
-      proxy: {
-        // authProxy: "http://192.168.13.173:8011/chatApplication/auth.do",
-        // msgResProxy:
-        //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do",
-        // actionResProxy:
-        //   "http://192.168.13.173:8011/chatApplication/actionMessage.do"
-        authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
-        msgResProxy:
-          "http://193.112.107.139:8011/chatApplication/messageReveiced.do",
-        actionResProxy:
-          "http://193.112.107.139:8011/chatApplication/actionMessage.do"
+    ws.init(
+      {
+        token: "aaaaaaaaaaa",
+        headerImg: "aaaaaaaa",
+        userId: userId,
+        nick: nickName,
+        proxy: {
+          // authProxy: "http://192.168.13.173:8011/chatApplication/auth.do",
+          // msgResProxy:
+          //   "http://192.168.13.173:8011/chatApplication/messageReveiced.do",
+          // actionResProxy:
+          //   "http://192.168.13.173:8011/chatApplication/actionMessage.do"
+          authProxy: "http://193.112.107.139:8011/chatApplication/auth.do",
+          msgResProxy:
+            "http://193.112.107.139:8011/chatApplication/messageReveiced.do",
+          actionResProxy:
+            "http://193.112.107.139:8011/chatApplication/actionMessage.do"
+        }
       },
       function() {
         //调用建权成功
       },
       function(error) {
         console.error(error);
+        alert(error);
       }
-    });
+    );
   }
 
   /**************************
@@ -333,11 +336,27 @@ $(function() {
         msgBox = renderImageMessageBox(direction, msgObj, res.sendUserInfo);
       } else if (msgObj.type === "text") {
         msgBox = renderTextMessageBox(direction, msgObj, res.sendUserInfo);
+      } else if (msgObj.type === "video") { 
+        msgBox = renderVideoMessageBox(direction, msgObj, res.sendUserInfo);
       }
 
       // console.log(msgBox);
       $("#roomChatContent").append(msgBox);
     } catch (e) {}
+  }
+
+  function renderVideoMessageBox (direction, msgObj, sendUserInfo) { 
+    var msgBox =
+    '<div class="chat-box ' +
+    direction +
+    '-chat-box clearfix"><div><p>' +
+    sendUserInfo.nick +
+    "说：" +
+    "</p>" +
+    "<p><video  width='320' height='240' controls" +
+    " ><source src='"+ msgObj.content.url+"' type='video/mp4'>  </video></p>" +
+    "</div></div>";
+  return msgBox;
   }
 
   function renderTextMessageBox(direction, msgObj, sendUserInfo) {
@@ -544,7 +563,7 @@ $(function() {
     $("input[name=upfile]").trigger("click");
   });
 
-  $("input[name=upfile]").on("change", function() {
+  $("input[name=upfile]").on("change", function () {
     var $file = $(this);
     var files = $file[0].files;
 
@@ -558,6 +577,11 @@ $(function() {
     if (!checkImgType(files[0].name)) {
       type = "file";
     }
+
+    if (checkVideoType(files[0].name)) { 
+      type = "video";
+    }
+    
 
     ws.upload({
       file: files[0],
@@ -618,6 +642,24 @@ $(function() {
     }
 
     if (!/\.(gif|jpg|jpeg|png|GIF|JPG|PNG)$/.test(name)) {
+      // alert("图片类型必须是.gif,jpeg,jpg,png中的一种");
+      return false;
+    }
+
+    return true;
+  }
+
+
+  /**
+   *
+   * @param {*} ths
+   */
+  function checkVideoType(name) {
+    if (!name) {
+      return false;
+    }
+
+    if (!/\.(mp4|avi)$/.test(name)) {
       // alert("图片类型必须是.gif,jpeg,jpg,png中的一种");
       return false;
     }
