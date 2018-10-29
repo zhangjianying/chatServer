@@ -20,6 +20,10 @@
 * ==聊天室[PC界面版]== 使用JS SDK之后整个聊天室js逻辑代码不超过500行 [进入聊天室](https://zhangjianying.github.io/chatServer/jsSdk/index.html)
 ![聊天室gif](https://zhangjianying.github.io/chatServer/doc/chatRoom.gif)
 
+* ==聊天室[移动端]== 基于Cordova.  [下载apk](https://zhangjianying.github.io/chatServer/doc/android-debug.apk)
+
+![聊天室gif](https://zhangjianying.github.io/chatServer/doc/mobileChat.png)
+
 # 目录大纲
 
 * [JSSDK 使用说明](doc/jssdk.md)

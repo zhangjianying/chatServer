@@ -420,20 +420,6 @@
      * @param {function} recieve - 返回websocket处理回执
      */
     upload(param) {
-      if (window.cordova) {
-        //适配cordova
-      } else {
-        this._uploadPC(param);
-      }
-    }
-
-    /************** PRIVATE METHOD **************/
-
-    /**
-     * PC文件上传
-     * @param {object} param
-     */
-    _uploadPC(param) {
       if (!param) {
         return;
       }
@@ -443,38 +429,122 @@
         return;
       }
 
-      let file = param.file;
-      let before = this._evaluateFunction(param.before);
-      let success = this._evaluateFunction(param.success);
-      let error = this._evaluateFunction(param.error);
-      let progress = this._evaluateFunction(param.progress);
-      let recieve = this._evaluateFunction(param.recieve);
+      let uploadParam = {
+        // file: param.file,
+        before: this._evaluateFunction(param.before),
+        success: this._evaluateFunction(param.success),
+        error: this._evaluateFunction(param.error),
+        progress: this._evaluateFunction(param.progress),
+        recieve: this._evaluateFunction(param.recieve),
+        clientFileId: this._uuid(), //唯一标识
+        userId: this.userInfo.userId,
+        url: this._getUploadUrl()
+      };
 
-      let clientFileId = this._uuid(); //唯一标识
-      let userId = this.userInfo.userId;
-      let url = this._getUploadUrl();
+      let _this = this;
+      if (window.cordova) {
+        //适配cordova
+        let fileURL = param.file.uri;
+        uploadParam.file = {};
+        uploadParam.file.uri = fileURL;
+        uploadParam.file.name = fileURL.substr(fileURL.lastIndexOf("/") + 1);
+        _this._uploadCordova(uploadParam);
+      } else {
+        uploadParam.file = param.file;
+        this._uploadPC(uploadParam);
+      }
+    }
+
+    /************** PRIVATE METHOD **************/
+
+    /**
+     * cordova 文件上传
+     * @param {object} param
+     */
+    _uploadCordova(param) {
+      if (!window.cordova) {
+        return;
+      }
 
       //上传开始准备
-      before(clientFileId);
-      this._ondebug("req", "准备上传文件：" + file.name, this._formatDate());
+      param.before(param.clientFileId);
+      this._ondebug(
+        "req",
+        "准备上传文件：" + param.file.name,
+        this._formatDate()
+      );
 
       //将recieve加入队列
-      this.uploadResList[clientFileId] = recieve;
+      this.uploadResList[param.clientFileId] = param.recieve;
+
+      let options = new FileUploadOptions();
+      options.fileKey = "upfile";
+      options.fileName = param.file.name;
+      // options.mimeType = "image/jpeg";
+      options.params = {
+        clientFileId: param.clientFileId,
+        userId: param.userId
+      };
+      options.clientFileId = param.clientFileId;
+      options.userId = param.userId;
+
+      let ft = new FileTransfer();
+
+      ft.onprogress = result => {
+        if (result.lengthComputable) {
+          //上传进度
+          let percent = Math.round((result.loaded / result.total) * 100);
+          param.progress(percent, result.loaded, result.total);
+
+          this._ondebug(
+            "req",
+            "上传文件进度" + percent + "%",
+            this._formatDate()
+          );
+        } else {
+          console.log("没有上传进度");
+        }
+      };
+
+      ft.upload(
+        param.file.uri,
+        encodeURI(param.url),
+        param.success,
+        param.error,
+        options
+      );
+    }
+
+    /**
+     * PC文件上传
+     * @param {object} param
+     */
+    _uploadPC(param) {
+      //上传开始准备
+      param.before(param.clientFileId);
+      this._ondebug(
+        "req",
+        "准备上传文件：" + param.file.name,
+        this._formatDate()
+      );
+
+      //将recieve加入队列
+      this.uploadResList[param.clientFileId] = param.recieve;
 
       let form = new FormData();
-      form.append("clientFileId", clientFileId);
-      form.append("userId", userId);
-      form.append("upfile", file);
+      form.append("clientFileId", param.clientFileId);
+      form.append("userId", param.userId);
+      form.append("upfile", param.file);
 
-      var xhr = new XMLHttpRequest();
+      let xhr = new XMLHttpRequest();
 
       xhr.upload.addEventListener(
         "progress",
         result => {
           if (result.lengthComputable) {
             //上传进度
-            var percent = Math.round((result.loaded / result.total) * 100);
-            progress(percent, result.loaded, result.total);
+            let percent = Math.round((result.loaded / result.total) * 100);
+            param.progress(percent, result.loaded, result.total);
 
             this._ondebug(
               "req",
@@ -489,11 +559,11 @@
       );
 
       // xhr.addEventListener("readystatechange", function() {});
-      xhr.addEventListener("load", success, false);
-      xhr.addEventListener("error", error, false);
-      xhr.addEventListener("abort", error, false);
+      xhr.addEventListener("load", param.success, false);
+      xhr.addEventListener("error", param.error, false);
+      xhr.addEventListener("abort", param.error, false);
 
-      xhr.open("POST", url, true);
+      xhr.open("POST", param.url, true);
       xhr.send(form);
     }
 
@@ -591,7 +661,7 @@
      */
     _uuid() {
       return "xxxxxxxxxxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-        var r = (Math.random() * 16) | 0,
+        let r = (Math.random() * 16) | 0,
           v = c == "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       });
