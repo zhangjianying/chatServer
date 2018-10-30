@@ -169,11 +169,12 @@ ws.on("recievemessage", function(res, msgType) {
 #### 返回值
 
 用户信息对象
-| 名称 | 类型 | 说明 |
+
+| 名称     | 类型     | 说明     |
 | ---- | ---- | ---- |
-| headerImg | string | 头像地址 |
-| userId | string | 用户唯一标识 |
-| nick | string | 用户昵称 |
+| headerImg  | string    | 头像地址    |
+| userId   | string    | 用户唯一标识    |
+| nick     | string    | 用户昵称     |
 
 ```javascript
 var userInfo = ws.getUserInfo();
