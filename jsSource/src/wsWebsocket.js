@@ -509,8 +509,12 @@
       ft.upload(
         param.file.uri,
         encodeURI(param.url),
-        param.success,
-        param.error,
+        () => {
+          param.success(param.clientFileId);
+        },
+        () => {
+          param.error(param.clientFileId);
+        },
         options
       );
     }
@@ -559,9 +563,27 @@
       );
 
       // xhr.addEventListener("readystatechange", function() {});
-      xhr.addEventListener("load", param.success, false);
-      xhr.addEventListener("error", param.error, false);
-      xhr.addEventListener("abort", param.error, false);
+      xhr.addEventListener(
+        "load",
+        () => {
+          param.success(param.clientFileId);
+        },
+        false
+      );
+      xhr.addEventListener(
+        "error",
+        () => {
+          param.error(param.clientFileId);
+        },
+        false
+      );
+      xhr.addEventListener(
+        "abort",
+        () => {
+          param.error(param.clientFileId);
+        },
+        false
+      );
 
       xhr.open("POST", param.url, true);
       xhr.send(form);
